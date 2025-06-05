@@ -75,37 +75,37 @@ stages:
           - apt update
 
 
-  # Put your custom actions above this comment
+      # Put your custom actions above this comment
 
-  - name: set-image-name-abroot
-    type: includes
-    includes:
-      - modules/80-set-image-abroot-config.yml
-
-  - name: cleanup
-    type: shell
-    commands:
-    - apt-get autoremove -y
-    - apt-get clean
-    - lpkg --lock
-
-  - name: fsguard
-    type: fsguard
-    CustomFsGuard: false
-    FsGuardLocation: "/usr/sbin/FsGuard"
-    GenerateKey: true
-    FilelistPaths: ["/usr/bin"]
-    modules:
-      - name: remove-prev-fsguard
+      - name: set-image-name-abroot
+        type: includes
+        includes:
+          - modules/80-set-image-abroot-config.yml
+    
+      - name: cleanup
         type: shell
         commands:
-          - rm -rf /FsGuard 
-          - rm -f ./minisign.pub ./minisign.key 
-          - chmod +x /usr/sbin/init
-
-  - name: cleanup2
-    type: shell
-    commands:
-      - rm -rf /tmp/*
-      - rm -rf /var/tmp/*
-      - rm -rf /sources
+        - apt-get autoremove -y
+        - apt-get clean
+        - lpkg --lock
+    
+      - name: fsguard
+        type: fsguard
+        CustomFsGuard: false
+        FsGuardLocation: "/usr/sbin/FsGuard"
+        GenerateKey: true
+        FilelistPaths: ["/usr/bin"]
+        modules:
+          - name: remove-prev-fsguard
+            type: shell
+            commands:
+              - rm -rf /FsGuard 
+              - rm -f ./minisign.pub ./minisign.key 
+              - chmod +x /usr/sbin/init
+    
+      - name: cleanup2
+        type: shell
+        commands:
+          - rm -rf /tmp/*
+          - rm -rf /var/tmp/*
+          - rm -rf /sources
