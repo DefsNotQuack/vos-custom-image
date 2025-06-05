@@ -21,16 +21,15 @@ stages:
       - lpkg --unlock
       - apt-get update
 
-  # Put your custom actions below this comment
+      # Put your custom actions below this comment
 
-      # Add Sid Sources
       - name: add-sid-sources
-            type: shell
-            commands:
-              - mv /etc/sid.sources /etc/apt/sources.list.d/
-              - mv /etc/apt/sources.list.d/vanilla-base.sources /etc/
-              - apt update
-  
+        type: shell
+        commands:
+          - mv /etc/sid.sources /etc/apt/sources.list.d/
+          - mv /etc/apt/sources.list.d/vanilla-base.sources /etc/
+          - apt update
+
       # Waydroid
       - name: uninstall-waydroid
         type: shell
@@ -44,7 +43,7 @@ stages:
           - rm -f /usr/share/vso/apx/stacks/vso-waydroid.yaml
           - rm -f /etc/modules.load.d/waydroid.conf
           - rm -f /etc/udev/rules.d/99-waydroid.rules
-  
+
       # Kernel
       - name: upgrade-kernel
         type: shell
@@ -68,13 +67,13 @@ stages:
 
           - apt install -t sid --fix-missing --fix-broken -y gdm3 xorg gnome-session gnome-shell gnome-control-center gnome-shell-extensions gnome-browser-connector dbus-x11 evolution-data-server geoclue-2.0 gjs xdg-desktop-portal xdg-desktop-portal-gnome xdg-desktop-portal-gtk gsettings-desktop-schemas libatk-adaptor libnotify-bin ibus-gtk ibus-gtk3 ibus-gtk4 libglib2.0-bin libblockdev-crypto3 libpam-gnome-keyring libproxy1-plugin-gsettings libwmf0.2-7-gtk libgdk-pixbuf2.0-bin libjxl-gdk-pixbuf libavif-gdk-pixbuf heif-gdk-pixbuf webp-pixbuf-loader ffmpegthumbnailer gnome-epub-thumbnailer ooo-thumbnailer nautilus nautilus-share python3-nautilus gnome-bluetooth-sendto gnome-color-manager gnome-menus gnome-online-accounts blackbox-terminal adwaita-icon-theme mutter
 
-      # Remove Sid Sources
       - name: remove-sid-sources
         type: shell
         commands:
           - rm /etc/apt/sources.list.d/sid.sources
           - mv /etc/vanilla-base.sources /etc/apt/sources.list.d/
           - apt update
+
 
   # Put your custom actions above this comment
 
