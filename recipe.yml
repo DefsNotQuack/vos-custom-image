@@ -1,5 +1,5 @@
-name: Custom Vanilla Desktop # Replace this name with your image name
-id: custom # Replace this ID with your image ID
+name: DefsNotVanilla # Replace this name with your image name
+id: def-not-vanilla # Replace this ID with your image ID
 stages:
 - id: build
   base: ghcr.io/vanilla-os/desktop:main # Optionally, Replace this image URL with a different one i.e. nvidia:main, etc
@@ -15,31 +15,66 @@ stages:
       - echo 'APT::Install-Recommends "1";' > /etc/apt/apt.conf.d/01norecommends
 
   modules:
-  - name: init-setup
-    type: shell
-    commands:
-    - lpkg --unlock
-    - apt-get update
+    - name: init-setup
+      type: shell
+      commands:
+      - lpkg --unlock
+      - apt-get update
 
   # Put your custom actions below this comment
 
-  - name: example-packages # Sample module using the built-in Apt module to install packages
-    type: apt
-    source:
-      packages:
-      - vim
+      # Add Sid Sources
+      - name: add-sid-sources
+            type: shell
+            commands:
+              - mv /etc/sid.sources /etc/apt/sources.list.d/
+              - mv /etc/apt/sources.list.d/vanilla-base.sources /etc/
+              - apt update
+  
+      # Waydroid
+      - name: uninstall-waydroid
+        type: shell
+        commands:
+          - dkms uninstall waydroid-binder/1 -k $(cat /usr/share/vanilla/kernel-version)
+          - dkms uninstall waydroid-ashmem/1 -k $(cat /usr/share/vanilla/kernel-version)
+          - rm -f -r /sources/waydroid-modules
+          - rm -f -r /usr/src/waydroid-binder-1
+          - rm -f -r /usr/src/waydroid-ashmem-1
+          - rm -f /usr/bin/waydroid
+          - rm -f /usr/share/vso/apx/stacks/vso-waydroid.yaml
+          - rm -f /etc/modules.load.d/waydroid.conf
+          - rm -f /etc/udev/rules.d/99-waydroid.rules
+  
+      # Kernel
+      - name: upgrade-kernel
+        type: shell
+        commands:
+          - apt remove -y linux-image-amd64 linux-headers-amd64
+          - apt install -t sid -y linux-image-amd64 linux-headers-amd64
+          - rm -f /usr/share/vanilla/kernel-version
+          - echo "$(ls -1 /usr/lib/modules | tail -n 1)" > /usr/share/vanilla/kernel-version
 
-  - name: example-commands # Sample module demonstrating the Shell module with custom commands
-    type: shell
-    commands:
-    - echo Example output
+      # Mesa
+      - name: upgrade-mesa
+        type: shell
+        commands:
+          - apt install -t sid -y mesa-vulkan-drivers libgl1-mesa-dri libglx-mesa0 mesa-utils
 
-  - name: example-modules # Sample module demonstrating importing local and remote modules
-    type: includes
-    includes:
-      - modules/50-install-debs.yml # Sample local module present in this repository
-      - gh:vanilla-os/dev-image:main:modules/00-basics.yml # Sample GitHub remote module in the format: `gh:your-name/your-repo:branch:modules/file.yml`
-      - https://raw.githubusercontent.com/Vanilla-OS/dev-image/main/modules/05-go.yml # Sample full URL remote module
+      # Gnome 48
+      - name: install-gnome-48
+        type: shell
+        commands:
+          - apt-mark unhold gnome-control-center mutter
+
+          - apt install -t sid --fix-missing --fix-broken -y gdm3 xorg gnome-session gnome-shell gnome-control-center gnome-shell-extensions gnome-browser-connector dbus-x11 evolution-data-server geoclue-2.0 gjs xdg-desktop-portal xdg-desktop-portal-gnome xdg-desktop-portal-gtk gsettings-desktop-schemas libatk-adaptor libnotify-bin ibus-gtk ibus-gtk3 ibus-gtk4 libglib2.0-bin libblockdev-crypto3 libpam-gnome-keyring libproxy1-plugin-gsettings libwmf0.2-7-gtk libgdk-pixbuf2.0-bin libjxl-gdk-pixbuf libavif-gdk-pixbuf heif-gdk-pixbuf webp-pixbuf-loader ffmpegthumbnailer gnome-epub-thumbnailer ooo-thumbnailer nautilus nautilus-share python3-nautilus gnome-bluetooth-sendto gnome-color-manager gnome-menus gnome-online-accounts blackbox-terminal adwaita-icon-theme mutter
+
+      # Remove Sid Sources
+      - name: remove-sid-sources
+        type: shell
+        commands:
+          - rm /etc/apt/sources.list.d/sid.sources
+          - mv /etc/vanilla-base.sources /etc/apt/sources.list.d/
+          - apt update
 
   # Put your custom actions above this comment
 
